@@ -1,9 +1,10 @@
 - id: auto-scanner
   name: Auto Scanner
-  description: 自动监控文件变化，Scan入库、Identify刮削、生成Emby兼容NFO
+  metadata:
+    description: 自动监控文件变化，Scan入库、Identify刮削、生成Emby兼容NFO
   version: 1.0.0
   date: 2026-03-12 14:00:00
-  path: auto-scanner/stash_auto_scanner.yml
-  sha256: ae1dd25971fd74e851c00e01bfc1e8829853aeefc639bf443aceeebac85b16f8
+  path: auto-scanner.zip
+  sha256: 29fe1bfd344641d3f1eac833e0d4bd36a0452b6e7f69f2389293b042eb3fe775
   author: liuhangbj
   source: https://github.com/liuhangbj/stash_tools
