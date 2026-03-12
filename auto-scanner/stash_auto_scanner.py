@@ -165,6 +165,7 @@ def get_recent_scenes(stash_conn, path, minutes=10):
                 path
                 date
                 rating100
+                details
                 performers { name }
                 studio { name }
                 tags { name }
@@ -179,52 +180,139 @@ def get_recent_scenes(stash_conn, path, minutes=10):
     return []
 
 def generate_nfo(scene, output_path):
+    """生成 Emby 兼容的 NFO 文件（参考 mcMetadata 格式）"""
     try:
         import xml.etree.ElementTree as ET
+        
         root = ET.Element("movie")
         
-        title = ET.SubElement(root, "title")
-        title.text = scene.get('title', '') or ''
+        # 基础标题信息
+        title_text = scene.get('title', '') or ''
         
+        name = ET.SubElement(root, "name")
+        name.text = title_text
+        
+        title = ET.SubElement(root, "title")
+        title.text = title_text
+        
+        originaltitle = ET.SubElement(root, "originaltitle")
+        originaltitle.text = title_text
+        
+        sorttitle = ET.SubElement(root, "sorttitle")
+        sorttitle.text = title_text
+        
+        # 评分
+        criticrating = ET.SubElement(root, "criticrating")
+        criticrating.text = ""
+        
+        rating = ET.SubElement(root, "rating")
+        rating.text = ""
+        
+        userrating = ET.SubElement(root, "userrating")
+        userrating.text = ""
+        
+        if scene.get('rating100'):
+            rating_val = str(scene['rating100'] / 20.0)
+            rating.text = rating_val
+            userrating.text = rating_val
+        
+        # 简介 (使用 CDATA)
+        plot = ET.SubElement(root, "plot")
+        details = scene.get('details', '')
+        if details:
+            plot.text = f"<![CDATA[{details}]]>"
+        
+        # 日期
         if scene.get('date'):
             premiered = ET.SubElement(root, "premiered")
             premiered.text = scene['date']
+            
+            releasedate = ET.SubElement(root, "releasedate")
+            releasedate.text = scene['date']
+            
             year = ET.SubElement(root, "year")
             year.text = scene['date'][:4]
         
-        if scene.get('rating100'):
-            rating = ET.SubElement(root, "rating")
-            rating.text = str(scene['rating100'] / 20.0)
-        
-        for performer in scene.get('performers', []):
-            actor = ET.SubElement(root, "actor")
-            name = ET.SubElement(actor, "name")
-            name.text = performer.get('name', '')
-        
+        # 制片公司
         if scene.get('studio'):
             studio = ET.SubElement(root, "studio")
             studio.text = scene['studio'].get('name', '')
         
+        # 海报缩略图
+        thumb = ET.SubElement(root, "thumb")
+        thumb.set("aspect", "poster")
+        # 使用场景ID生成海报文件名（与mcMetadata一致）
+        scene_id = scene.get('id', '')
+        if title_text:
+            safe_title = "".join(c for c in title_text if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            thumb.text = f"{safe_title}-poster.jpg"
+        
+        # 演员信息（完整格式）
+        for idx, performer in enumerate(scene.get('performers', [])):
+            actor = ET.SubElement(root, "actor")
+            
+            name = ET.SubElement(actor, "name")
+            performer_name = performer.get('name', '')
+            name.text = performer_name
+            
+            role = ET.SubElement(actor, "role")
+            role.text = performer_name
+            
+            order = ET.SubElement(actor, "order")
+            order.text = str(idx)
+            
+            actor_type = ET.SubElement(actor, "type")
+            actor_type.text = "Actor"
+            
+            # 演员头像路径（Emby本地缓存路径）
+            if performer_name:
+                actor_thumb = ET.SubElement(actor, "thumb")
+                safe_name = performer_name.replace(' ', '%20')
+                actor_thumb.text = f"/Users/hangbits/.config/emby-server/metadata/People/{performer_name}/folder.jpg"
+        
+        # 类型标签
+        genre = ET.SubElement(root, "genre")
+        genre.text = "Adult"
+        
+        # 场景标签
         for tag in scene.get('tags', []):
-            genre = ET.SubElement(root, "genre")
-            genre.text = tag.get('name', '')
             tag_elem = ET.SubElement(root, "tag")
             tag_elem.text = tag.get('name', '')
         
-        files = scene.get('files', [])
-        if files:
-            file_info = files[0]
-            resolution = ET.SubElement(root, "resolution")
-            resolution.text = f"{file_info.get('width', 0)}x{file_info.get('height', 0)}"
-            codec = ET.SubElement(root, "codec")
-            codec.text = file_info.get('video_codec', '')
+        # Stash 唯一ID
+        if scene_id:
+            uniqueid = ET.SubElement(root, "uniqueid")
+            uniqueid.set("type", "stash")
+            uniqueid.text = str(scene_id)
+        
+        # 写入文件（美化格式）
+        def indent(elem, level=0):
+            """美化 XML 缩进"""
+            i = "\n" + level * "  "
+            if len(elem):
+                if not elem.text or not elem.text.strip():
+                    elem.text = i + "  "
+                if not elem.tail or not elem.tail.strip():
+                    elem.tail = i
+                for child in elem:
+                    indent(child, level + 1)
+                if not child.tail or not child.tail.strip():
+                    child.tail = i
+            else:
+                if level and (not elem.tail or not elem.tail.strip()):
+                    elem.tail = i
+        
+        indent(root)
         
         tree = ET.ElementTree(root)
         tree.write(output_path, encoding='utf-8', xml_declaration=True)
+        
         log_info(f"✅ NFO 已生成: {output_path}")
         return True
     except Exception as e:
         log_error(f"❌ NFO 生成失败: {e}")
+        import traceback
+        log_error(traceback.format_exc())
         return False
 
 def process_nfo_generation(scenes):
