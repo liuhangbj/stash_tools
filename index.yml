@@ -3,8 +3,8 @@
   metadata:
     description: 自动监控文件变化，Scan入库、Identify刮削、生成Emby兼容NFO
   version: 1.0.0
-  date: 2026-03-12 15:15:00
+  date: 2026-03-12 15:20:00
   path: auto-scanner.zip
-  sha256: a4521714553199f646f66330c8a247f4d509b8c36db8b0bc9a37c73ee0f1f836
+  sha256: d9e07e74eaaf3d24e8ef0b2a6522e45bc54bcc0ab2874655873bbe5f3fafc645
   author: liuhangbj
   source: https://github.com/liuhangbj/stash_tools
