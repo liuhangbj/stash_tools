@@ -1,5 +1,5 @@
 # Stash Tools Plugin Repository
-# 添加此地址到 Stash: https://raw.githubusercontent.com/liuhangbj/stash_tools/main/index.yml
+# 添加此地址到 Stash: https://raw.githubusercontent.com/liuhangbj/stash_tools/master/index.yml
 
 - id: auto-scanner
   name: Auto Scanner
