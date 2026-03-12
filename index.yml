@@ -1,0 +1,11 @@
+# Stash Tools Plugin Repository
+# 添加此地址到 Stash: https://raw.githubusercontent.com/liuhangbj/stash_tools/main/index.yml
+
+- id: auto-scanner
+  name: Auto Scanner
+  description: 自动监控文件变化，Scan入库、Identify刮削、生成Emby兼容NFO
+  version: 1.0.0
+  date: 2026-03-12
+  path: auto-scanner/stash_auto_scanner.yml
+  author: liuhangbj
+  source: https://github.com/liuhangbj/stash_tools

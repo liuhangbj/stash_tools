@@ -1,0 +1,71 @@
+name: Auto Scanner
+description: 自动监控文件变化，Scan入库、Identify刮削、生成Emby兼容NFO
+version: 1.0.0
+url: https://github.com/liuhangbj/stash_tools/tree/main/auto-scanner
+exec:
+  - python
+  - stash_auto_scanner.py
+interface: raw
+settings:
+  enabled:
+    displayName: 启用插件
+    description: 开启自动监控功能
+    type: BOOLEAN
+    default: true
+  auto_start:
+    displayName: 随 Stash 启动
+    description: Stash 启动时自动运行监控
+    type: BOOLEAN
+    default: true
+  watch_paths:
+    displayName: 监控路径
+    description: 需要监控的目录路径，每行一个（支持CD2挂载的网盘）
+    type: STRING
+    default: "/Volumes/115/9.Porns/2.Western\n/Volumes/115/9.Porns/1.Japan"
+  scan_delay:
+    displayName: Scan 延迟(秒)
+    description: 文件变化后等待多久开始 Scan
+    type: NUMBER
+    default: 30
+  identify_delay:
+    displayName: Identify 延迟(秒)
+    description: Scan 完成后等待多久开始 Identify
+    type: NUMBER
+    default: 120
+  nfo_delay:
+    displayName: NFO 延迟(秒)
+    description: Identify 完成后等待多久生成 NFO
+    type: NUMBER
+    default: 180
+  use_polling:
+    displayName: 使用轮询模式
+    description: CD2挂载的网盘需要开启（普通本地文件夹不需要）
+    type: BOOLEAN
+    default: true
+  poll_interval:
+    displayName: 轮询间隔(秒)
+    description: 轮询模式下检查间隔（CD2建议30秒以上）
+    type: NUMBER
+    default: 30
+tasks:
+  - name: 启动监控
+    description: 启动 Auto Scanner 监控
+    defaultArgs:
+      mode: start
+  - name: 停止监控
+    description: 停止 Auto Scanner 监控
+    defaultArgs:
+      mode: stop
+  - name: 查看状态
+    description: 查看当前运行状态
+    defaultArgs:
+      mode: status
+  - name: 重新加载
+    description: 停止并重新启动监控
+    defaultArgs:
+      mode: reload
+hooks:
+  - name: Auto Scanner 启动
+    description: Stash 启动时自动启动监控
+    triggeredBy:
+      - System.Startup
