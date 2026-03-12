@@ -4,6 +4,6 @@
   version: 1.0.0
   date: 2026-03-12 14:00:00
   path: auto-scanner/stash_auto_scanner.yml
-  checksum: ae1dd25971fd74e851c00e01bfc1e8829853aeefc639bf443aceeebac85b16f8
+  sha256: ae1dd25971fd74e851c00e01bfc1e8829853aeefc639bf443aceeebac85b16f8
   author: liuhangbj
   source: https://github.com/liuhangbj/stash_tools
